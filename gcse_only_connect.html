@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GCSE Science — Only Connect Wall</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --border: #1e2d45;
+    --text: #e8f0fe;
+    --muted: #6b7fa3;
+    --accent: #00d4ff;
+
+    --bio: #22c55e;
+    --bio-dark: #14532d;
+    --bio-glow: rgba(34,197,94,0.35);
+
+    --chem: #f97316;
+    --chem-dark: #7c2d12;
+    --chem-glow: rgba(249,115,22,0.35);
+
+    --phys: #818cf8;
+    --phys-dark: #312e81;
+    --phys-glow: rgba(129,140,248,0.35);
+
+    --mix: #f59e0b;
+    --mix-dark: #78350f;
+    --mix-glow: rgba(245,158,11,0.35);
+
+    --tile-bg: #1a2540;
+    --tile-hover: #233060;
+    --tile-selected: #0ea5e9;
+    --tile-selected-bg: #0c2a40;
+    --tile-wrong: #ef4444;
+    --tile-wrong-bg: #2d1010;
+
+    --radius: 14px;
+    --tile-radius: 10px;
+    --font-display: 'Orbitron', sans-serif;
+    --font-body: 'Exo 2', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,212,255,0.08) 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.02) 40px);
+  }
+
+  /* ===== SETUP SCREEN ===== */
+  #setup-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 40px;
+  }
+
+  .title-block {
+    text-align: center;
+  }
+
+  .title-block h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, #00d4ff 0%, #818cf8 50%, #22c55e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    text-shadow: none;
+  }
+
+  .title-block .subtitle {
+    margin-top: 10px;
+    font-size: 1.1rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .setup-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    box-shadow: 0 0 60px rgba(0,212,255,0.06), 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .setup-section h2 {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .opt-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 16px 20px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .opt-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .opt-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  .opt-btn.active {
+    color: var(--bg);
+    border-color: transparent;
+    font-weight: 700;
+  }
+
+  /* Subject button colours */
+  .opt-btn[data-subject="Biology"].active { background: var(--bio); box-shadow: 0 0 20px var(--bio-glow); }
+  .opt-btn[data-subject="Chemistry"].active { background: var(--chem); box-shadow: 0 0 20px var(--chem-glow); }
+  .opt-btn[data-subject="Physics"].active { background: var(--phys); box-shadow: 0 0 20px var(--phys-glow); }
+  .opt-btn[data-subject="Mixed"].active { background: var(--mix); box-shadow: 0 0 20px var(--mix-glow); }
+
+  /* Difficulty button colours */
+  .opt-btn[data-diff="Foundation"].active { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 0 20px var(--bio-glow); }
+  .opt-btn[data-diff="Higher"].active { background: linear-gradient(135deg, #818cf8, #6366f1); box-shadow: 0 0 20px var(--phys-glow); }
+
+  .start-btn {
+    width: 100%;
+    padding: 22px;
+    border: none;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, #00d4ff, #0ea5e9);
+    color: #000;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 30px rgba(0,212,255,0.3);
+    text-transform: uppercase;
+  }
+
+  .start-btn:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(0,212,255,0.5); }
+  .start-btn:active { transform: translateY(0); }
+  .start-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ===== GAME SCREEN ===== */
+  #game-screen { display: none; min-height: 100vh; flex-direction: column; padding: 20px; gap: 16px; max-width: 1400px; margin: 0 auto; width: 100%; }
+
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .game-title {
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .game-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .badge-foundation { background: rgba(34,197,94,0.2); color: var(--bio); border: 1px solid rgba(34,197,94,0.4); }
+  .badge-higher { background: rgba(129,140,248,0.2); color: var(--phys); border: 1px solid rgba(129,140,248,0.4); }
+
+  .lives-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .lives-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .life-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--tile-wrong);
+    box-shadow: 0 0 8px rgba(239,68,68,0.5);
+    transition: all 0.3s;
+  }
+
+  .life-dot.lost {
+    background: #2d1010;
+    box-shadow: none;
+  }
+
+  .status-bar {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .status-msg {
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s;
+    padding: 10px 24px;
+    border-radius: 999px;
+  }
+
+  .status-msg.info { color: var(--accent); background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.2); }
+  .status-msg.wrong { color: var(--tile-wrong); background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+  .status-msg.correct { color: var(--bio); background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); }
+  .status-msg.warning { color: var(--mix); background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); }
+
+  /* ===== WALL GRID ===== */
+  .wall-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Solved rows sit at the top */
+  .solved-rows { display: flex; flex-direction: column; gap: 10px; }
+
+  .solved-row {
+    border-radius: var(--tile-radius);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    animation: solvedReveal 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    overflow: hidden;
+  }
+
+  @keyframes solvedReveal {
+    from { opacity: 0; transform: scaleY(0.5) translateY(-10px); }
+    to { opacity: 1; transform: scaleY(1) translateY(0); }
+  }
+
+  .solved-row.bio { background: var(--bio-dark); border: 1.5px solid var(--bio); box-shadow: 0 0 20px var(--bio-glow); }
+  .solved-row.chem { background: var(--chem-dark); border: 1.5px solid var(--chem); box-shadow: 0 0 20px var(--chem-glow); }
+  .solved-row.phys { background: var(--phys-dark); border: 1.5px solid var(--phys); box-shadow: 0 0 20px var(--phys-glow); }
+  .solved-row.mix { background: var(--mix-dark); border: 1.5px solid var(--mix); box-shadow: 0 0 20px var(--mix-glow); }
+
+  .solved-label {
+    font-family: var(--font-display);
+    font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    min-width: 160px;
+  }
+
+  .solved-row.bio .solved-label { color: var(--bio); }
+  .solved-row.chem .solved-label { color: var(--chem); }
+  .solved-row.phys .solved-label { color: var(--phys); }
+  .solved-row.mix .solved-label { color: var(--mix); }
+
+  .solved-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .solved-word {
+    font-size: clamp(0.85rem, 1.5vw, 1rem);
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.1);
+  }
+
+  /* Tile grid */
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    flex: 1;
+  }
+
+  .tile {
+    background: var(--tile-bg);
+    border: 2px solid var(--border);
+    border-radius: var(--tile-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 14px 10px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: clamp(0.85rem, 1.6vw, 1.15rem);
+    font-weight: 700;
+    color: var(--text);
+    user-select: none;
+    transition: all 0.15s;
+    min-height: 80px;
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tile::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.08), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .tile:hover:not(.selected):not(.shake) {
+    background: var(--tile-hover);
+    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .tile:hover::after { opacity: 1; }
+
+  .tile.selected {
+    background: var(--tile-selected-bg);
+    border-color: var(--tile-selected);
+    color: #fff;
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 0 20px rgba(14,165,233,0.4), 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .tile.shake {
+    animation: shake 0.4s ease-in-out;
+    background: var(--tile-wrong-bg);
+    border-color: var(--tile-wrong);
+    color: var(--tile-wrong);
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-8px); }
+    30% { transform: translateX(8px); }
+    45% { transform: translateX(-6px); }
+    60% { transform: translateX(6px); }
+    75% { transform: translateX(-3px); }
+    90% { transform: translateX(3px); }
+  }
+
+  .tile.pulse-correct {
+    animation: pulseCorrect 0.4s ease-out;
+  }
+
+  @keyframes pulseCorrect {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); box-shadow: 0 0 30px rgba(34,197,94,0.6); }
+    100% { transform: scale(1); }
+  }
+
+  .tile.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* ===== ACTION BUTTONS ===== */
+  .action-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 8px 0;
+  }
+
+  .action-btn {
+    padding: 14px 32px;
+    border-radius: var(--radius);
+    border: 2px solid;
+    font-family: var(--font-display);
+    font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 140px;
+  }
+
+  .btn-submit {
+    background: linear-gradient(135deg, #00d4ff, #0ea5e9);
+    border-color: transparent;
+    color: #000;
+    box-shadow: 0 0 20px rgba(0,212,255,0.25);
+  }
+
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0,212,255,0.4); }
+  .btn-submit:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-deselect {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--muted);
+  }
+
+  .btn-deselect:hover { border-color: var(--text); color: var(--text); }
+  .btn-deselect:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-newgame {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-newgame:hover { background: rgba(0,212,255,0.1); transform: translateY(-2px); }
+
+  /* ===== GAME OVER / WIN ===== */
+  #result-screen {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 30px;
+  }
+
+  .result-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 900;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  .result-title.win {
+    background: linear-gradient(135deg, #22c55e, #00d4ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .result-title.lose {
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .result-subtitle {
+    font-size: 1.2rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .result-reveal {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .result-reveal-row {
+    border-radius: var(--tile-radius);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: solvedReveal 0.5s both;
+  }
+
+  .result-reveal-row:nth-child(1) { animation-delay: 0.1s; }
+  .result-reveal-row:nth-child(2) { animation-delay: 0.2s; }
+  .result-reveal-row:nth-child(3) { animation-delay: 0.3s; }
+  .result-reveal-row:nth-child(4) { animation-delay: 0.4s; }
+
+  .result-reveal-row.bio { background: var(--bio-dark); border: 1.5px solid var(--bio); }
+  .result-reveal-row.chem { background: var(--chem-dark); border: 1.5px solid var(--chem); }
+  .result-reveal-row.phys { background: var(--phys-dark); border: 1.5px solid var(--phys); }
+  .result-reveal-row.mix { background: var(--mix-dark); border: 1.5px solid var(--mix); }
+
+  .result-cat { font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .result-reveal-row.bio .result-cat { color: var(--bio); }
+  .result-reveal-row.chem .result-cat { color: var(--chem); }
+  .result-reveal-row.phys .result-cat { color: var(--phys); }
+  .result-reveal-row.mix .result-cat { color: var(--mix); }
+
+  .result-words { font-size: 1rem; font-weight: 600; color: var(--text); }
+
+  .result-buttons { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+
+  /* ===== LIVE COUNTER (groups remaining) ===== */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .groups-left {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  .phase-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .phase-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .phase-free .phase-dot { background: var(--bio); box-shadow: 0 0 6px var(--bio-glow); }
+  .phase-pressure .phase-dot { background: var(--tile-wrong); box-shadow: 0 0 6px rgba(239,68,68,0.5); animation: pulseDot 1s infinite; }
+  .phase-free { color: var(--bio); }
+  .phase-pressure { color: var(--tile-wrong); }
+
+  @keyframes pulseDot {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+  }
+
+  /* Subject legend */
+  .subject-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot.bio { background: var(--bio); }
+  .legend-dot.chem { background: var(--chem); }
+  .legend-dot.phys { background: var(--phys); }
+  .legend-dot.mix { background: var(--mix); }
+
+  /* ===== CONFETTI ===== */
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ===== HINT PILL ===== */
+  .hint-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    background: rgba(255,255,255,0.07);
+    color: var(--muted);
+  }
+
+  .hint-pill:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .tile { font-size: 0.8rem; padding: 10px 6px; min-height: 64px; }
+    .solved-label { min-width: 100px; font-size: 0.65rem; }
+    .setup-panel { padding: 24px; }
+    .action-btn { padding: 12px 20px; font-size: 0.75rem; min-width: 100px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== SETUP SCREEN ===== -->
+<div id="setup-screen">
+  <div class="title-block">
+    <h1>SCIENCE<br>CONNECT</h1>
+    <div class="subtitle">AQA GCSE — Only Connect Wall</div>
+  </div>
+
+  <div class="setup-panel">
+    <div class="setup-section">
+      <h2>⚗️ Subject</h2>
+      <div class="btn-group">
+        <button class="opt-btn active" data-subject="Mixed" onclick="selectSubject(this)">🔬 Mixed</button>
+        <button class="opt-btn" data-subject="Biology" onclick="selectSubject(this)">🌿 Biology</button>
+        <button class="opt-btn" data-subject="Chemistry" onclick="selectSubject(this)">⚗️ Chemistry</button>
+        <button class="opt-btn" data-subject="Physics" onclick="selectSubject(this)">⚡ Physics</button>
+      </div>
+    </div>
+
+    <div class="setup-section">
+      <h2>🎓 Difficulty</h2>
+      <div class="btn-group">
+        <button class="opt-btn active" data-diff="Foundation" onclick="selectDiff(this)">Foundation Tier</button>
+        <button class="opt-btn" data-diff="Higher" onclick="selectDiff(this)">Higher Tier</button>
+      </div>
+    </div>
+
+    <div class="setup-section" style="background:rgba(255,255,255,0.03); border-radius:12px; padding:20px; border:1px solid var(--border);">
+      <h2>📋 How to Play</h2>
+      <div style="color:var(--muted); font-size:0.92rem; line-height:1.7;">
+        Find the <strong style="color:var(--text)">four groups of four</strong> words that share a connection.<br>
+        Select 4 tiles and press <strong style="color:var(--accent)">Submit</strong>.<br>
+        <span style="color:var(--bio)">Groups 1 & 2</span> — unlimited attempts.<br>
+        <span style="color:var(--tile-wrong)">Groups 3 & 4</span> — only <strong style="color:var(--text)">3 wrong guesses</strong> allowed!
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="startGame()">▶ START GAME</button>
+  </div>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div id="game-screen">
+  <div class="game-header">
+    <div class="game-title">SCIENCE CONNECT</div>
+    <div class="game-meta">
+      <span class="badge" id="diff-badge"></span>
+      <span class="badge" id="subj-badge" style="background:rgba(255,255,255,0.08); color:var(--text); border:1px solid var(--border);"></span>
+    </div>
+  </div>
+
+  <div class="progress-row">
+    <div class="groups-left" id="groups-left-label">4 groups remaining</div>
+    <div class="phase-indicator phase-free" id="phase-indicator">
+      <div class="phase-dot"></div>
+      <span id="phase-label">Free Play</span>
+    </div>
+    <div class="lives-display" id="lives-display" style="display:none;">
+      ❤️ Lives:
+      <div class="lives-dots" id="lives-dots"></div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-msg info" id="status-msg">Select 4 tiles that share a connection</div>
+  </div>
+
+  <div class="wall-area">
+    <div class="solved-rows" id="solved-rows"></div>
+    <div class="tile-grid" id="tile-grid"></div>
+  </div>
+
+  <div class="subject-legend" id="subject-legend"></div>
+
+  <div class="action-row">
+    <button class="action-btn btn-deselect" id="btn-deselect" onclick="deselectAll()" disabled>Clear</button>
+    <button class="action-btn btn-submit" id="btn-submit" onclick="submitGuess()" disabled>Submit</button>
+    <button class="action-btn btn-newgame" onclick="goToSetup()">New Game</button>
+  </div>
+</div>
+
+<!-- ===== RESULT SCREEN ===== -->
+<div id="result-screen">
+  <div class="result-title" id="result-title"></div>
+  <div class="result-subtitle" id="result-subtitle"></div>
+  <div class="result-reveal" id="result-reveal"></div>
+  <div class="result-buttons">
+    <button class="action-btn btn-submit" onclick="startGame()">▶ Play Again</button>
+    <button class="action-btn btn-newgame" onclick="goToSetup()">Change Settings</button>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const ALL_DATA = [{"category":"Cell structures","difficulty":"Foundation","subject":"Biology","words":["nucleus","mitochondria","ribosome","cell membrane"]},{"category":"Specialised cells","difficulty":"Foundation","subject":"Biology","words":["red blood cell","root hair cell","sperm cell","palisade cell"]},{"category":"Gas exchange surfaces","difficulty":"Foundation","subject":"Biology","words":["alveoli","gills","stomata","spiracles"]},{"category":"Enzyme action","difficulty":"Foundation","subject":"Biology","words":["enzyme","substrate","active site","denatured"]},{"category":"Factors affecting enzymes","difficulty":"Foundation","subject":"Biology","words":["temperature","pH","substrate concentration","optimum"]},{"category":"Transport across membranes","difficulty":"Foundation","subject":"Biology","words":["diffusion","osmosis","active transport","concentration gradient"]},{"category":"Plant tissues","difficulty":"Foundation","subject":"Biology","words":["xylem","phloem","palisade mesophyll","spongy mesophyll"]},{"category":"Photosynthesis inputs","difficulty":"Foundation","subject":"Biology","words":["carbon dioxide","water","light","chlorophyll"]},{"category":"Photosynthesis factors","difficulty":"Higher","subject":"Biology","words":["carbon dioxide concentration","light intensity","temperature","chlorophyll"]},{"category":"Aerobic respiration","difficulty":"Foundation","subject":"Biology","words":["glucose","oxygen","energy","carbon dioxide"]},{"category":"Anaerobic respiration","difficulty":"Foundation","subject":"Biology","words":["lactic acid","ethanol","glucose","no oxygen"]},{"category":"Digestive enzymes","difficulty":"Foundation","subject":"Biology","words":["amylase","protease","lipase","bile"]},{"category":"Human digestive organs","difficulty":"Foundation","subject":"Biology","words":["stomach","small intestine","pancreas","liver"]},{"category":"Blood components","difficulty":"Foundation","subject":"Biology","words":["plasma","red blood cell","platelets","white blood cell"]},{"category":"Heart structures","difficulty":"Foundation","subject":"Biology","words":["atrium","ventricle","aorta","vena cava"]},{"category":"Hormones","difficulty":"Foundation","subject":"Biology","words":["insulin","glucagon","adrenaline","thyroxine"]},{"category":"Homeostasis examples","difficulty":"Higher","subject":"Biology","words":["blood glucose","body temperature","water balance","negative feedback"]},{"category":"Pathogen types","difficulty":"Foundation","subject":"Biology","words":["bacteria","virus","fungi","protist"]},{"category":"Disease spread","difficulty":"Foundation","subject":"Biology","words":["pandemic","epidemic","vector","pathogen"]},{"category":"Natural selection","difficulty":"Higher","subject":"Biology","words":["variation","competition","selection","inheritance"]},{"category":"Genetic material","difficulty":"Foundation","subject":"Biology","words":["DNA","gene","chromosome","genome"]},{"category":"Genetic crosses","difficulty":"Foundation","subject":"Biology","words":["dominant","recessive","heterozygous","Punnett square"]},{"category":"Mutation causes","difficulty":"Higher","subject":"Biology","words":["radiation","chemicals","random error","DNA"]},{"category":"Levels of organisation","difficulty":"Foundation","subject":"Biology","words":["cell","tissue","organ","organ system"]},{"category":"Ecosystem roles","difficulty":"Foundation","subject":"Biology","words":["producer","primary consumer","secondary consumer","apex predator"]},{"category":"Carbon cycle processes","difficulty":"Higher","subject":"Biology","words":["photosynthesis","respiration","combustion","decomposition"]},{"category":"Sampling methods","difficulty":"Higher","subject":"Biology","words":["quadrat","transect","random sampling","population estimate"]},{"category":"Plant responses","difficulty":"Foundation","subject":"Biology","words":["phototropism","geotropism","auxin","growth"]},{"category":"Defence mechanisms","difficulty":"Foundation","subject":"Biology","words":["antibodies","antibiotics","white blood cells","immunity"]},{"category":"States of matter","difficulty":"Foundation","subject":"Chemistry","words":["solid","liquid","gas","molten"]},{"category":"Particle model","difficulty":"Foundation","subject":"Chemistry","words":["particle","random motion","attraction","kinetic energy"]},{"category":"Physical changes","difficulty":"Foundation","subject":"Chemistry","words":["melting","freezing","boiling","condensation"]},{"category":"Chemical reactions","difficulty":"Foundation","subject":"Chemistry","words":["reactant","product","reaction","energy change"]},{"category":"Reaction types","difficulty":"Foundation","subject":"Chemistry","words":["exothermic","endothermic","neutralisation","oxidation"]},{"category":"Rates of reaction factors","difficulty":"Higher","subject":"Chemistry","words":["temperature","surface area","concentration","catalyst"]},{"category":"Collision theory","difficulty":"Higher","subject":"Chemistry","words":["collision frequency","activation energy","successful collision","particle"]},{"category":"Acids","difficulty":"Foundation","subject":"Chemistry","words":["acid","pH","hydrogen","corrosive"]},{"category":"Bases and alkalis","difficulty":"Foundation","subject":"Chemistry","words":["alkali","base","neutralisation","salt"]},{"category":"Ions","difficulty":"Foundation","subject":"Chemistry","words":["positive ion","negative ion","electron","charge"]},{"category":"Bonding types","difficulty":"Foundation","subject":"Chemistry","words":["ionic","covalent","metallic","delocalised electrons"]},{"category":"Giant structures","difficulty":"Higher","subject":"Chemistry","words":["giant ionic lattice","giant covalent","metallic","intermolecular"]},{"category":"Hydrocarbons","difficulty":"Foundation","subject":"Chemistry","words":["alkane","alkene","hydrocarbon","polymer"]},{"category":"Fractional distillation","difficulty":"Higher","subject":"Chemistry","words":["boiling point","fraction","column","condense"]},{"category":"Crude oil products","difficulty":"Foundation","subject":"Chemistry","words":["petrol","diesel","kerosene","bitumen"]},{"category":"Combustion products","difficulty":"Foundation","subject":"Chemistry","words":["carbon dioxide","water","carbon monoxide","particulates"]},{"category":"Electrolysis terms","difficulty":"Foundation","subject":"Chemistry","words":["electrolyte","anode","cathode","direct current"]},{"category":"Redox vocabulary","difficulty":"Higher","subject":"Chemistry","words":["oxidation","reduction","electron transfer","half equation"]},{"category":"Separation methods","difficulty":"Foundation","subject":"Chemistry","words":["filtration","distillation","chromatography","crystallisation"]},{"category":"Water purification","difficulty":"Foundation","subject":"Chemistry","words":["filtration","chlorination","sedimentation","potable"]},{"category":"Green chemistry","difficulty":"Higher","subject":"Chemistry","words":["life cycle assessment","carbon footprint","renewable","sustainability"]},{"category":"Types of force","difficulty":"Foundation","subject":"Physics","words":["gravity","friction","air resistance","tension"]},{"category":"Motion quantities","difficulty":"Foundation","subject":"Physics","words":["distance","speed","velocity","displacement"]},{"category":"Newton's first law","difficulty":"Higher","subject":"Physics","words":["inertia","resultant force","constant velocity","balanced forces"]},{"category":"Newton's second law","difficulty":"Higher","subject":"Physics","words":["force","mass","acceleration","F = ma"]},{"category":"Momentum","difficulty":"Higher","subject":"Physics","words":["momentum","mass","velocity","conservation"]},{"category":"Energy stores","difficulty":"Foundation","subject":"Physics","words":["kinetic","thermal","gravitational potential","elastic potential"]},{"category":"Energy transfers","difficulty":"Foundation","subject":"Physics","words":["heating","radiation","work done","electrical"]},{"category":"Power and efficiency","difficulty":"Higher","subject":"Physics","words":["power","energy transfer","time","efficiency"]},{"category":"Units","difficulty":"Foundation","subject":"Physics","words":["joule","watt","newton","coulomb"]},{"category":"Waves properties","difficulty":"Foundation","subject":"Physics","words":["frequency","wavelength","amplitude","period"]},{"category":"Electromagnetic spectrum","difficulty":"Foundation","subject":"Physics","words":["radio","microwave","infrared","visible"]},{"category":"Ionising radiation","difficulty":"Higher","subject":"Physics","words":["alpha","beta","gamma","X-ray"]},{"category":"Radioactive decay","difficulty":"Higher","subject":"Physics","words":["half-life","random","decay","activity"]},{"category":"Electric circuits","difficulty":"Foundation","subject":"Physics","words":["current","potential difference","resistance","cell"]},{"category":"Circuit components","difficulty":"Foundation","subject":"Physics","words":["resistor","diode","LED","thermistor"]},{"category":"Magnetism","difficulty":"Foundation","subject":"Physics","words":["magnetic field","magnet","solenoid","electromagnet"]},{"category":"Motor effect","difficulty":"Higher","subject":"Physics","words":["current","magnetic field","force","motor effect"]},{"category":"Transformers","difficulty":"Higher","subject":"Physics","words":["primary coil","secondary coil","step-up","step-down"]},{"category":"Named scientists","difficulty":"Higher","subject":"Mixed","words":["Darwin","Newton","Mendel","Faraday"]},{"category":"Named units","difficulty":"Foundation","subject":"Mixed","words":["joule","watt","newton","ampere"]},{"category":"Things that store energy","difficulty":"Foundation","subject":"Mixed","words":["battery","fuel","spring","raised object"]},{"category":"Rate words","difficulty":"Foundation","subject":"Mixed","words":["speed","heart rate","rate of reaction","count rate"]},{"category":"Transport processes","difficulty":"Higher","subject":"Mixed","words":["diffusion","conduction","convection","radiation"]},{"category":"Measurement vocabulary","difficulty":"Foundation","subject":"Mixed","words":["accuracy","precision","resolution","uncertainty"]},{"category":"Graph features","difficulty":"Foundation","subject":"Mixed","words":["gradient","intercept","trend","anomaly"]},{"category":"Safety language","difficulty":"Foundation","subject":"Mixed","words":["hazard","risk","control variable","safe"]},{"category":"Environmental issues","difficulty":"Higher","subject":"Mixed","words":["global warming","pollution","carbon footprint","sustainability"]},{"category":"Processes involving energy transfer","difficulty":"Higher","subject":"Mixed","words":["heating","radiation","work done","respiration"]},{"category":"Things involving electrons","difficulty":"Higher","subject":"Mixed","words":["ion","current","covalent bond","reduction"]},{"category":"Diffusion contexts","difficulty":"Higher","subject":"Mixed","words":["gas exchange","osmosis","diffusion","concentration gradient"]},{"category":"Energy releasing processes","difficulty":"Higher","subject":"Mixed","words":["exothermic","respiration","combustion","condensation"]},{"category":"Energy absorbing processes","difficulty":"Higher","subject":"Mixed","words":["endothermic","evaporation","melting","photosynthesis"]},{"category":"Quantities with rates","difficulty":"Foundation","subject":"Physics","words":["speed","current","activity","frequency"]},{"category":"Conservation laws","difficulty":"Higher","subject":"Physics","words":["energy","mass","momentum","charge"]},{"category":"Causes of acceleration","difficulty":"Higher","subject":"Physics","words":["force","gravity","friction","resultant force"]},{"category":"Collision theory terms","difficulty":"Higher","subject":"Chemistry","words":["collision","activation energy","successful collision","rate"]},{"category":"Acid concepts","difficulty":"Foundation","subject":"Chemistry","words":["pH","acid","neutralisation","hydrogen ion"]},{"category":"Transported substances","difficulty":"Foundation","subject":"Biology","words":["glucose","oxygen","water","hormones"]},{"category":"Defence cells","difficulty":"Higher","subject":"Biology","words":["lymphocyte","phagocyte","white blood cell","antibody"]},{"category":"Enzyme processes","difficulty":"Higher","subject":"Biology","words":["digestion","respiration","photosynthesis","DNA replication"]},{"category":"Global warming causes","difficulty":"Higher","subject":"Mixed","words":["carbon dioxide","methane","deforestation","combustion"]},{"category":"Human environmental impact","difficulty":"Higher","subject":"Biology","words":["pollution","deforestation","eutrophication","climate change"]},{"category":"Graph quantities","difficulty":"Foundation","subject":"Mixed","words":["gradient","intercept","area","line of best fit"]},{"category":"Types of variables","difficulty":"Foundation","subject":"Mixed","words":["independent","dependent","control","variable"]},{"category":"Sources of error","difficulty":"Higher","subject":"Mixed","words":["systematic error","random error","uncertainty","precision"]},{"category":"Group 1 elements","difficulty":"Foundation","subject":"Chemistry","words":["lithium","sodium","potassium","francium"]},{"category":"Group 2 elements","difficulty":"Foundation","subject":"Chemistry","words":["magnesium","calcium","beryllium","strontium"]},{"category":"Group 7 elements","difficulty":"Foundation","subject":"Chemistry","words":["fluorine","chlorine","bromine","iodine"]},{"category":"Group 0 elements","difficulty":"Foundation","subject":"Chemistry","words":["neon","helium","xenon","krypton"]},{"category":"Microscope parts","difficulty":"Foundation","subject":"Biology","words":["stage","slide","focus","eyepiece"]}];
+
+// Subject → colour class mapping
+const SUBJ_CLASS = { Biology:'bio', Chemistry:'chem', Physics:'phys', Mixed:'mix' };
+const SUBJ_COLOURS = { Biology:'var(--bio)', Chemistry:'var(--chem)', Physics:'var(--phys)', Mixed:'var(--mix)' };
+
+// Game state
+let settings = { subject: 'Mixed', difficulty: 'Foundation' };
+let gameGroups = [];      // [{category, subject, words:[...]}, ...]  — 4 groups for this round
+let tileOrder = [];       // shuffled flat list of word strings
+let selected = [];        // currently selected tile words
+let solvedGroups = [];    // solved group indices (into gameGroups)
+let livesLeft = 3;
+let inPressurePhase = false;
+let wrongInPressure = 0;
+let isAnimating = false;
+
+// ===== SETUP =====
+function selectSubject(btn) {
+  document.querySelectorAll('[data-subject]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  settings.subject = btn.dataset.subject;
+}
+
+function selectDiff(btn) {
+  document.querySelectorAll('[data-diff]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  settings.difficulty = btn.dataset.diff;
+}
+
+function goToSetup() {
+  document.getElementById('setup-screen').style.display = 'flex';
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'none';
+}
+
+// ===== GAME START =====
+function startGame() {
+  // Filter pool
+  let pool = ALL_DATA.filter(d => d.difficulty === settings.difficulty);
+  if (settings.subject !== 'Mixed') {
+    pool = pool.filter(d => d.subject === settings.subject);
+  }
+
+  // De-duplicate by category name (trim whitespace)
+  const seen = new Set();
+  pool = pool.filter(d => {
+    const key = d.category.trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  if (pool.length < 4) {
+    alert('Not enough categories for this combination. Try Mixed or a different difficulty.');
+    return;
+  }
+
+  // Pick 4 random categories
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  gameGroups = shuffled.slice(0, 4);
+
+  // Shuffle the 16 words
+  tileOrder = gameGroups.flatMap(g => g.words).sort(() => Math.random() - 0.5);
+
+  // Reset state
+  selected = [];
+  solvedGroups = [];
+  livesLeft = 3;
+  inPressurePhase = false;
+  wrongInPressure = 0;
+  isAnimating = false;
+
+  // Switch screens
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'flex';
+
+  // Render badges
+  const diffBadge = document.getElementById('diff-badge');
+  diffBadge.textContent = settings.difficulty;
+  diffBadge.className = 'badge ' + (settings.difficulty === 'Foundation' ? 'badge-foundation' : 'badge-higher');
+
+  document.getElementById('subj-badge').textContent = settings.subject === 'Mixed' ? '🔬 Mixed Science' : settings.subject;
+
+  // Render subject legend (only subjects present in the wall)
+  renderLegend();
+
+  // Render grid
+  renderGrid();
+
+  // Reset UI
+  document.getElementById('solved-rows').innerHTML = '';
+  setStatus('Select 4 tiles that share a connection', 'info');
+  updateGroupsLeft();
+  updatePhaseIndicator();
+  updateLivesDisplay();
+  updateButtons();
+}
+
+function renderLegend() {
+  const subjects = [...new Set(gameGroups.map(g => g.subject))];
+  const legend = document.getElementById('subject-legend');
+  legend.innerHTML = subjects.map(s =>
+    `<div class="legend-item">
+      <div class="legend-dot ${SUBJ_CLASS[s]}"></div>
+      <span style="color:var(--muted)">${s}</span>
+    </div>`
+  ).join('');
+}
+
+function renderGrid() {
+  const grid = document.getElementById('tile-grid');
+  grid.innerHTML = '';
+  tileOrder.forEach(word => {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.textContent = word;
+    tile.dataset.word = word;
+    tile.addEventListener('click', () => onTileClick(tile));
+    grid.appendChild(tile);
+  });
+}
+
+// ===== TILE INTERACTION =====
+function onTileClick(tile) {
+  if (isAnimating) return;
+  const word = tile.dataset.word;
+  if (selected.includes(word)) {
+    selected = selected.filter(w => w !== word);
+    tile.classList.remove('selected');
+  } else {
+    if (selected.length >= 4) return;
+    selected.push(word);
+    tile.classList.add('selected');
+  }
+  updateButtons();
+}
+
+function deselectAll() {
+  selected = [];
+  document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
+  updateButtons();
+}
+
+function updateButtons() {
+  document.getElementById('btn-submit').disabled = selected.length !== 4;
+  document.getElementById('btn-deselect').disabled = selected.length === 0;
+}
+
+// ===== SUBMIT GUESS =====
+function submitGuess() {
+  if (selected.length !== 4 || isAnimating) return;
+
+  // Find which group (if any) matches exactly
+  const remaining = gameGroups.filter((_, i) => !solvedGroups.includes(i));
+  let matchIndex = -1;
+
+  for (let i = 0; i < gameGroups.length; i++) {
+    if (solvedGroups.includes(i)) continue;
+    const groupWords = gameGroups[i].words;
+    if (selected.every(w => groupWords.includes(w)) && groupWords.every(w => selected.includes(w))) {
+      matchIndex = i;
+      break;
+    }
+  }
+
+  if (matchIndex !== -1) {
+    handleCorrect(matchIndex);
+  } else {
+    // Check if one away
+    let oneAway = false;
+    for (let i = 0; i < gameGroups.length; i++) {
+      if (solvedGroups.includes(i)) continue;
+      const groupWords = gameGroups[i].words;
+      const overlap = selected.filter(w => groupWords.includes(w)).length;
+      if (overlap === 3) { oneAway = true; break; }
+    }
+    handleWrong(oneAway);
+  }
+}
+
+function handleCorrect(groupIdx) {
+  isAnimating = true;
+  const group = gameGroups[groupIdx];
+
+  // Pulse the matching tiles
+  const tiles = [...document.querySelectorAll('.tile')];
+  const matchTiles = tiles.filter(t => group.words.includes(t.dataset.word));
+  matchTiles.forEach(t => { t.classList.add('pulse-correct'); t.classList.remove('selected'); });
+
+  setTimeout(() => {
+    solvedGroups.push(groupIdx);
+    selected = [];
+
+    // Remove solved tiles from grid
+    matchTiles.forEach(t => t.remove());
+
+    // Add solved row
+    addSolvedRow(group);
+
+    // Update tileOrder for remaining tiles
+    tileOrder = tileOrder.filter(w => !group.words.includes(w));
+
+    // Check win
+    if (solvedGroups.length === 4) {
+      setTimeout(() => showResult(true), 600);
+      isAnimating = false;
+      return;
+    }
+
+    // Enter pressure phase after 2 solved?
+    const remainingCount = 4 - solvedGroups.length;
+    if (remainingCount <= 2 && !inPressurePhase) {
+      inPressurePhase = true;
+      setStatus('⚠️ Pressure phase! Only 3 wrong guesses remain for the last 2 groups.', 'warning');
+    } else {
+      setStatus(`Correct! ${remainingCount} group${remainingCount !== 1 ? 's' : ''} remaining`, 'correct');
+    }
+
+    updateGroupsLeft();
+    updatePhaseIndicator();
+    updateLivesDisplay();
+    updateButtons();
+    isAnimating = false;
+  }, 500);
+}
+
+function handleWrong(oneAway) {
+  isAnimating = true;
+  const tiles = document.querySelectorAll('.tile.selected');
+  tiles.forEach(t => { t.classList.add('shake'); t.classList.remove('selected'); });
+
+  if (inPressurePhase) {
+    wrongInPressure++;
+    livesLeft = Math.max(0, 3 - wrongInPressure);
+    updateLivesDisplay();
+
+    if (wrongInPressure >= 3) {
+      // Game over
+      setTimeout(() => showResult(false), 600);
+      isAnimating = false;
+      selected = [];
+      return;
+    }
+  }
+
+  setTimeout(() => {
+    tiles.forEach(t => t.classList.remove('shake'));
+    selected = [];
+    const msg = oneAway
+      ? (inPressurePhase ? `One away! ${livesLeft} ${livesLeft === 1 ? 'guess' : 'guesses'} left` : 'So close — one away! Try again')
+      : (inPressurePhase ? `Wrong! ${livesLeft} ${livesLeft === 1 ? 'guess' : 'guesses'} left` : 'Not quite — try again');
+    setStatus(msg, 'wrong');
+    updateButtons();
+    isAnimating = false;
+  }, 450);
+}
+
+// ===== SOLVED ROW =====
+function addSolvedRow(group) {
+  const cls = SUBJ_CLASS[group.subject];
+  const row = document.createElement('div');
+  row.className = `solved-row ${cls}`;
+  row.innerHTML = `
+    <div class="solved-label">${group.category}</div>
+    <div class="solved-words">${group.words.map(w => `<span class="solved-word">${w}</span>`).join('')}</div>
+  `;
+  document.getElementById('solved-rows').appendChild(row);
+}
+
+// ===== RESULT =====
+function showResult(won) {
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'flex';
+
+  document.getElementById('result-title').textContent = won ? '🎉 Well Done!' : '😬 Game Over';
+  document.getElementById('result-title').className = 'result-title ' + (won ? 'win' : 'lose');
+  document.getElementById('result-subtitle').textContent = won
+    ? 'You found all four groups!'
+    : 'You ran out of guesses on the last two groups.';
+
+  const reveal = document.getElementById('result-reveal');
+  reveal.innerHTML = gameGroups.map(g => {
+    const cls = SUBJ_CLASS[g.subject];
+    return `<div class="result-reveal-row ${cls}">
+      <div class="result-cat">${g.category}</div>
+      <div class="result-words">${g.words.join(' · ')}</div>
+    </div>`;
+  }).join('');
+
+  if (won) launchConfetti();
+}
+
+// ===== UI HELPERS =====
+function setStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = 'status-msg ' + type;
+}
+
+function updateGroupsLeft() {
+  const left = 4 - solvedGroups.length;
+  document.getElementById('groups-left-label').textContent = `${left} group${left !== 1 ? 's' : ''} remaining`;
+}
+
+function updatePhaseIndicator() {
+  const indicator = document.getElementById('phase-indicator');
+  const label = document.getElementById('phase-label');
+  if (inPressurePhase) {
+    indicator.className = 'phase-indicator phase-pressure';
+    label.textContent = 'Pressure Phase';
+  } else {
+    indicator.className = 'phase-indicator phase-free';
+    label.textContent = 'Free Play';
+  }
+}
+
+function updateLivesDisplay() {
+  const display = document.getElementById('lives-display');
+  const dots = document.getElementById('lives-dots');
+
+  if (inPressurePhase) {
+    display.style.display = 'flex';
+    dots.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'life-dot' + (i >= livesLeft ? ' lost' : '');
+      dots.appendChild(dot);
+    }
+  } else {
+    display.style.display = 'none';
+  }
+}
+
+// ===== CONFETTI =====
+function launchConfetti() {
+  const colours = ['#00d4ff','#22c55e','#f97316','#818cf8','#f59e0b','#ffffff'];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = colours[Math.floor(Math.random() * colours.length)];
+      piece.style.width = (6 + Math.random() * 10) + 'px';
+      piece.style.height = (6 + Math.random() * 10) + 'px';
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+      piece.style.animationDelay = '0s';
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 4000);
+    }, i * 30);
+  }
+}
+</script>
+</body>
+</html>
